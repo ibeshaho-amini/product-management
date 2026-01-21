@@ -373,6 +373,7 @@
 
 // export default Dashboard;
 // Dashboard.jsx - FIXED
+
 import React, { useState, useEffect } from 'react';
 import { getProducts, deleteProduct } from '../api/product_api';
 import ProductTable from '../component/product_table';
@@ -528,7 +529,7 @@ const Dashboard = () => {
 
         <div className="mt-auto pt-5" style={{ marginTop: 'auto' }}>
           <hr className="border-white-50" />
-          <p className="small text-white-50 mb-0">© 2024 PMS</p>
+          <p className="small text-white-50 mb-0">© 2025 amini</p>
           <p className="small text-white-50">All Rights Reserved</p>
         </div>
       </div>
