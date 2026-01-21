@@ -1,6 +1,6 @@
 # Product Management System
 ##  Features : 
-**Add, Edit, Delete Products** 
+**Add, Edit, view ,Delete Products** 
 
 ###  Backend:
 ## technologies used :
@@ -17,7 +17,7 @@ cd product-management`
 
 ### Setup Backend
 `cd backend
-npm instal`
+npm install`
 
 ### Run Sequelize migrations
 `npx sequelize-cli db:migrate`
