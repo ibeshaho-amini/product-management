@@ -3,20 +3,13 @@ const { Product } = require('../models');
 
 exports.createProduct = async (req, res) => {
   try {
-    const { name, description, price, stock } = req.body;
-
-    const product = await Product.create({
-      name,
-      description,
-      price,
-      stock
-    });
-
-    return res.status(201).json(product);
-  } catch (error) {
-    return res.status(500).json({ error: error.message });
+    const { name, description, price, stock, image } = req.body;
+    const product = await Product.create({ name, description, price, stock, image });
+    res.status(201).json(product);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
-};
+}
 
 exports.getAllProducts = async (req, res) => {
   try {
