@@ -54,7 +54,7 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: 0
       },
       image: {
-        type: DataTypes.STRING, // store image URL or path
+        type: DataTypes.STRING,
         allowNull: true
       }
     },
