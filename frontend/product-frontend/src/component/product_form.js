@@ -121,7 +121,6 @@
 
 // export default ProductForm;
 
-
 import React, { useState } from 'react';
 import { createProduct, updateProduct } from '../api/product_api';
 
@@ -138,8 +137,11 @@ const ProductForm = ({ form, setForm, handleSubmit, editing, onSuccess, onCancel
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setForm((prev) => ({ ...prev, imageFile: file, image: imageUrl }));
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setForm((prev) => ({ ...prev, image: reader.result }));
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -151,49 +153,59 @@ const ProductForm = ({ form, setForm, handleSubmit, editing, onSuccess, onCancel
 
     try {
       // Validate required fields
-      if (!form.name || !form.price || form.stock === '') {
-        setError('Please fill in all required fields');
+      if (!form.name || form.name.trim() === '') {
+        setError('Product name is required');
+        setLoading(false);
+        return;
+      }
+      if (!form.price || form.price <= 0) {
+        setError('Valid price is required');
+        setLoading(false);
+        return;
+      }
+      if (form.stock === '' || form.stock < 0) {
+        setError('Valid stock quantity is required');
         setLoading(false);
         return;
       }
 
-      // Create FormData to handle file upload
-      const formData = new FormData();
-      formData.append('name', form.name);
-      formData.append('description', form.description || '');
-      formData.append('price', form.price);
-      formData.append('stock', form.stock);
-      
-      // Add image if selected
-      if (form.imageFile) {
-        formData.append('image', form.imageFile);
-      }
+      // Prepare data as JSON (not FormData)
+      const productData = {
+        name: form.name.trim(),
+        description: form.description || '',
+        price: parseFloat(form.price),
+        stock: parseInt(form.stock),
+        image: form.image || null
+      };
 
       let response;
 
       if (editing) {
         // Update existing product
-        response = await updateProduct(editing, formData);
+        response = await updateProduct(editing, productData);
         setSuccess('Product updated successfully!');
       } else {
         // Create new product
-        response = await createProduct(formData);
+        response = await createProduct(productData);
         setSuccess('Product created successfully!');
       }
 
-      // Reset form
-      setForm({ name: '', description: '', price: '', stock: '', image: '', imageFile: null });
+      console.log('Response:', response);
 
-      // Call onSuccess callback if provided (for Dashboard)
+      // Reset form
+      setForm({ 
+        name: '', 
+        description: '', 
+        price: '', 
+        stock: '', 
+        image: ''
+      });
+
+      // Call onSuccess callback if provided
       if (onSuccess) {
         setTimeout(() => {
           onSuccess();
         }, 1000);
-      }
-
-      // Call handleSubmit if provided
-      if (handleSubmit) {
-        handleSubmit({ preventDefault: () => {} });
       }
 
     } catch (err) {
@@ -202,9 +214,9 @@ const ProductForm = ({ form, setForm, handleSubmit, editing, onSuccess, onCancel
       if (err.response?.data?.error) {
         setError(err.response.data.error);
       } else if (err.message) {
-        setError('Failed to save product. Please try again.');
+        setError(err.message);
       } else {
-        setError('Something went wrong. Please try again.');
+        setError('Failed to save product. Please try again.');
       }
     } finally {
       setLoading(false);
@@ -212,7 +224,13 @@ const ProductForm = ({ form, setForm, handleSubmit, editing, onSuccess, onCancel
   };
 
   const handleReset = () => {
-    setForm({ name: '', description: '', price: '', stock: '', image: '', imageFile: null });
+    setForm({ 
+      name: '', 
+      description: '', 
+      price: '', 
+      stock: '', 
+      image: ''
+    });
     setError('');
     setSuccess('');
     if (onCancel) {
@@ -250,7 +268,7 @@ const ProductForm = ({ form, setForm, handleSubmit, editing, onSuccess, onCancel
           </div>
         )}
 
-        <form onSubmit={handleFormSubmit} encType="multipart/form-data">
+        <form onSubmit={handleFormSubmit}>
           <div className="mb-3">
             <label className="form-label">Name *</label>
             <input
@@ -316,7 +334,7 @@ const ProductForm = ({ form, setForm, handleSubmit, editing, onSuccess, onCancel
 
           {/* Image Upload */}
           <div className="mb-3">
-            <label className="form-label">Product Image</label>
+            <label className="form-label">Product Image (Base64)</label>
             <input
               type="file"
               className="form-control"
