@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3000/api/products';
+const API_URL = 'https://product-management-6qys.onrender.com';
 
 export const getProducts = () => axios.get(API_URL);
 export const getProduct = (id) => axios.get(`${API_URL}/${id}`);
